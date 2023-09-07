@@ -1,6 +1,7 @@
 class Calculator:
 
     def add(x, y):
+        x - y
         return x + y
 
     def subtract(x, y):
@@ -13,6 +14,3 @@ class Calculator:
         if y == 0:
             return 'Cannot divide by 0'
         return x * 1.0 / y
-
-    def smile():
-        return ":)"
