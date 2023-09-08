@@ -40,7 +40,7 @@ jobs:
 
             echo "Collected ${#UNIQUE_LABELS[@]} tests to run"
             LABELS_AS_STRING=$(printf -- " %s" ${UNIQUE_LABELS[*]})
-            echo "export CODECOV_LABELS=$LABELS_AS_STRING" >> "$BASH_ENV"
+            echo "export CODECOV_LABELS=\"${LABELS_AS_STRING}\"" >> "$BASH_ENV"
       - run:
           name: Run tests and coverage
           command: |
