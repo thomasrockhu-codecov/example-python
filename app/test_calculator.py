@@ -31,3 +31,6 @@ def test_divide():
 
 def test_new():
     assert Calculator.add(1, 4) == 5.0
+
+def test_for_circleci():
+    assert Calculator.multiply(1, 1) == 1.0

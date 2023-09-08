@@ -1,6 +1,4 @@
 version: 2.1
-orbs:
-  codecov: codecov/codecov@3
 
 jobs:
   build:
@@ -10,12 +8,51 @@ jobs:
       - checkout
       - run:
           name: Install dependencies
-          command: pip install -r requirements.txt
+          command: |
+            python -m pip install --upgrade pip
+            pip install -r requirements.txt
       - run:
-          name: Run tests and collect coverage
-          command: pytest --cov app
-      - codecov/upload
+          name: Create commit in codecov
+          command: codecovcli create-commit -t ${CODECOV_TOKEN}
+      - run:
+          name: Create commit report in codecov
+          command: codecovcli create-report -t ${CODECOV_TOKEN}
+      - run:
+          name: Static Analysis
+          command: codecovcli static-analysis --token ${CODECOV_STATIC_TOKEN}
+      - run:
+          name: Label Analysis
+          command: |
+            exec 3>&1
+            BASE_SHA=$(git merge-base $(git rev-parse HEAD)^ origin/main)
+            TESTS=$(codecovcli label-analysis --token ${CODECOV_STATIC_TOKEN} --base-sha=$BASE_SHA --dry-run 2>&1 | tee >(cat - >&3) )
+            ALL_LABELS=($(echo $TESTS | tail -1 | sed 's/\"present_report_labels[^]]*\]//' | awk -vRS="]" -vFS="[" '{print $2}' ORS=' ' | sed 's/\"//g' | sed 's/,//g' | tr -s ' '))
+            UNIQUE_LABELS=($(echo "${ALL_LABELS[@]}" | tr ' ' '\n' | sort -u | tr '\n' ' '))
+            echo "UNIQUE_LABELS"
+            echo ${UNIQUE_LABELS[*]}
+            PRESENT_REPORT_LABELS=($(echo $TESTS | tail -1 | awk -vRS="]" -vFS="present_report_labels\":" '{print $2}' ORS=' ' | sed 's/\"//g' | sed 's/,//g' | sed 's/\[//g' | tr -s ' '))
+            echo "PRESENT_REPORT_LABELS"
+            echo ${PRESENT_REPORT_LABELS[*]}
+            if [ ${#UNIQUE_LABELS[@]} -eq 0 ]; then
+              echo "All tests are being skipped. Selected random label to run"
+              UNIQUE_LABELS=${PRESENT_REPORT_LABELS[ $RANDOM % ${#PRESENT_REPORT_LABELS[@]} ]}
+            fi
 
+            echo "Collected ${#UNIQUE_LABELS[@]} tests to run"
+            LABELS_AS_STRING=$(printf -- " %s" ${UNIQUE_LABELS[*]})
+            echo "export CODECOV_LABELS=$LABELS_AS_STRING" >> "$BASH_ENV"
+      - run:
+          name: Run tests and coverage
+          command: |
+            echo ${CODECOV_LABELS}
+            pytest --cov=app ${CODECOV_LABELS}
+      - name: Upload to Codecov
+        run: |
+          codecovcli --codecov-yml-path=codecov.yml do-upload \
+          -t ${CODECOV_TOKEN} \
+          --plugin pycoverage \
+          --plugin compress-pycoverage \
+          --flag smart-tests
 workflow:
   version: 2.1
   build-test:
