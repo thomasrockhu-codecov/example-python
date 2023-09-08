@@ -27,14 +27,17 @@ jobs:
           codecovcli static-analysis --token ${{ secrets.CODECOV_STATIC_TOKEN }}
       - name: Label Analysis
         run: |
-          set -x
           BASE_SHA=$(git rev-parse HEAD^)
           TESTS=$(codecovcli label-analysis --token ${{ secrets.CODECOV_STATIC_TOKEN }} --base-sha=$BASE_SHA --dry-run 2>&1)
-          printf $TESTS
+          echo $TESTS
           ALL_LABELS=($(echo $TESTS | tail -1 | sed 's/\"present_report_labels.*\], //' | awk -vRS="]" -vFS="[" '{print $2}' ORS=' ' | sed 's/\"//g' | sed 's/,//g' | tr -s ' '))
+          echo "ALL_LABELS"
+          echo $ALL_LABELS
           PRESENT_REPORT_LABELS=($(echo $TESTS | tail -1 | awk -vRS="]" -vFS="present_report_labels\":" '{print $2}' ORS=' ' | sed 's/\"//g' | sed 's/,//g' | sed 's/\[//g' | tr -s ' '))
+          echo "PRESENT_REPORT_LABELS"
+          echo $PRESENT_REPORT_LABELS
           if [ ${#ALL_LABELS[@]} -eq 0 ]; then
-            printf "All tests are being skipped. Selected random label to run"
+            echo "All tests are being skipped. Selected random label to run"
             ALL_LABELS=${PRESENT_REPORT_LABELS[ $RANDOM % ${#PRESENT_REPORT_LABELS[@]} ]}
           fi
           echo "CODECOV_LABELS=($ALL_LABELS)" >> $GITHUB_ENV
