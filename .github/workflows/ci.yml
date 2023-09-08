@@ -41,11 +41,11 @@ jobs:
             echo "All tests are being skipped. Selected random label to run"
             UNIQUE_LABELS=${PRESENT_REPORT_LABELS[ $RANDOM % ${#PRESENT_REPORT_LABELS[@]} ]}
           fi
-          echo "CODECOV_LABELS=$UNIQUE_LABELS" >> $GITHUB_ENV
+          echo 'CODECOV_LABELS=$(printf -- " %s" ${UNIQUE_LABELS[*]})' >> $GITHUB_ENV
       - name: Run tests and coverage
         run: |
           echo ${{ env.CODECOV_LABELS }}
-          pytest --cov=app $(echo ${{ env.CODECOV_LABELS }})
+          pytest --cov=app echo ${{ env.CODECOV_LABELS }}
       - name: Upload to Codecov
         run: |
           codecovcli --codecov-yml-path=codecov.yml do-upload \
