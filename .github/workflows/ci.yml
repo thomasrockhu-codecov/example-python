@@ -31,8 +31,8 @@ jobs:
           BASE_SHA=$(git merge-base ${{ github.sha }}^ origin/main)
           TESTS=$(codecovcli label-analysis --token ${{ secrets.CODECOV_STATIC_TOKEN }} --base-sha=$BASE_SHA --dry-run 2>&1 | tee >(cat - >&3) )
           ALL_LABELS=($(echo $TESTS | tail -1 | sed 's/\"present_report_labels.*\], //' | awk -vRS="]" -vFS="[" '{print $2}' ORS=' ' | sed 's/\"//g' | sed 's/,//g' | tr -s ' '))
+          echo "ALL_LABELS"
           echo ${ALL_LABELS[*]}
-          echo $ALL_LABELS
           PRESENT_REPORT_LABELS=($(echo $TESTS | tail -1 | awk -vRS="]" -vFS="present_report_labels\":" '{print $2}' ORS=' ' | sed 's/\"//g' | sed 's/,//g' | sed 's/\[//g' | tr -s ' '))
           echo "PRESENT_REPORT_LABELS"
           echo ${PRESENT_REPORT_LABELS[*]}
@@ -43,8 +43,8 @@ jobs:
           echo "CODECOV_LABELS=$ALL_LABELS" >> $GITHUB_ENV
       - name: Run tests and coverage
         run: |
-          echo ${{ env.CODECOV_LABELS }}
-          pytest --cov=app ${{ env.CODECOV_LABELS }}
+          echo ${{ env.CODECOV_LABELS[*] }}
+          pytest --cov=app ${{ env.CODECOV_LABELS[*] }}
       - name: Upload to Codecov
         run: |
           codecovcli --codecov-yml-path=codecov.yml do-upload \
