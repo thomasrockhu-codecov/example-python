@@ -30,7 +30,7 @@ jobs:
           exec 3>&1
           BASE_SHA=$(git merge-base ${{ github.sha }}^ origin/main)
           TESTS=$(codecovcli label-analysis --token ${{ secrets.CODECOV_STATIC_TOKEN }} --base-sha=$BASE_SHA --dry-run 2>&1 | tee >(cat - >&3) )
-          ALL_LABELS=($(echo $TESTS | tail -1 | sed 's/\"present_report_labels(.*?)\]//' | awk -vRS="]" -vFS="[" '{print $2}' ORS=' ' | sed 's/\"//g' | sed 's/,//g' | tr -s ' '))
+          ALL_LABELS=($(echo $TESTS | tail -1 | sed 's/, \"present_report_labels[^]]*\]//' | awk -vRS="]" -vFS="[" '{print $2}' ORS=' ' | sed 's/\"//g' | sed 's/,//g' | tr -s ' '))
           UNIQUE_LABELS=$(echo "${ALL_LABELS[@]}" | tr ' ' '\n' | sort -u | tr '\n' ' ')
           echo "UNIQUE_LABELS"
           echo ${UNIQUE_LABELS[*]}
