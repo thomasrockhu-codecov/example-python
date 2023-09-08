@@ -46,13 +46,14 @@ jobs:
           command: |
             echo ${CODECOV_LABELS}
             pytest --cov=app ${CODECOV_LABELS}
-      - name: Upload to Codecov
-        run: |
-          codecovcli --codecov-yml-path=codecov.yml do-upload \
-          -t ${CODECOV_TOKEN} \
-          --plugin pycoverage \
-          --plugin compress-pycoverage \
-          --flag smart-tests
+      - run:
+          name: Upload to Codecov
+          command: |
+            codecovcli --codecov-yml-path=codecov.yml do-upload \
+            -t ${CODECOV_TOKEN} \
+            --plugin pycoverage \
+            --plugin compress-pycoverage \
+            --flag smart-tests
 workflow:
   version: 2.1
   build-test:
