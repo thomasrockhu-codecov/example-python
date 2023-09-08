@@ -42,6 +42,7 @@ jobs:
             UNIQUE_LABELS=${PRESENT_REPORT_LABELS[ $RANDOM % ${#PRESENT_REPORT_LABELS[@]} ]}
           fi
 
+          echo "Collected ${#UNIQUE_LABELS[@]} tests to run"
           LABELS_AS_STRING=$(printf -- " %s" ${UNIQUE_LABELS[*]})
           echo "CODECOV_LABELS=$LABELS_AS_STRING" >> $GITHUB_ENV
       - name: Run tests and coverage
