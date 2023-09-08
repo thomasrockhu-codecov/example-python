@@ -27,8 +27,9 @@ jobs:
           codecovcli static-analysis --token ${{ secrets.CODECOV_STATIC_TOKEN }}
       - name: Label Analysis
         run: |
+          exec 3>&1
           BASE_SHA=$(git rev-parse HEAD^)
-          TESTS=$(codecovcli label-analysis --token ${{ secrets.CODECOV_STATIC_TOKEN }} --base-sha=$BASE_SHA --dry-run 2>&1 | tee /dev/tty)
+          TESTS=$(codecovcli label-analysis --token ${{ secrets.CODECOV_STATIC_TOKEN }} --base-sha=$BASE_SHA --dry-run 2>&1 | tee >(cat - >&3) )
           ALL_LABELS=($(echo $TESTS | tail -1 | sed 's/\"present_report_labels.*\], //' | awk -vRS="]" -vFS="[" '{print $2}' ORS=' ' | sed 's/\"//g' | sed 's/,//g' | tr -s ' '))
           echo "ALL_LABELS"
           echo $ALL_LABELS
