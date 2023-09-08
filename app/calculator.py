@@ -16,6 +16,3 @@ class Calculator:
 
     def smile():
         return ":)"
-
-    def make_a_change():
-        return "change"
