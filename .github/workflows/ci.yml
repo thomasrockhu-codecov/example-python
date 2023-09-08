@@ -27,7 +27,7 @@ jobs:
           codecovcli static-analysis --token ${{ secrets.CODECOV_STATIC_TOKEN }}
       - name: Label Analysis
         run: |
-          set -e
+          set -x
           BASE_SHA=$(git rev-parse HEAD^)
           TESTS=$(codecovcli label-analysis --token ${{ secrets.CODECOV_STATIC_TOKEN }} --base-sha=$BASE_SHA --dry-run 2>&1)
           printf $TESTS
