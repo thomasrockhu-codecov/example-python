@@ -44,8 +44,9 @@ jobs:
           echo "CODECOV_LABELS=$UNIQUE_LABELS" >> $GITHUB_ENV
       - name: Run tests and coverage
         run: |
-          echo $(${{ env.CODECOV_LABELS[*] }}[@])
-          pytest --cov=app $(${{ env.CODECOV_LABELS[*] }}[@])
+          LABELS=${{ env.CODECOV_LABELS }}
+          echo $LABELS[@]
+          pytest --cov=app $LABELS[@]
       - name: Upload to Codecov
         run: |
           codecovcli --codecov-yml-path=codecov.yml do-upload \
