@@ -43,7 +43,7 @@ jobs:
           fi
 
           LABELS_AS_STRING=$(printf -- " %s" ${UNIQUE_LABELS[*]})
-          echo 'CODECOV_LABELS=$LABELS_AS_STRING' >> $GITHUB_ENV
+          echo "CODECOV_LABELS=$LABELS_AS_STRING" >> $GITHUB_ENV
       - name: Run tests and coverage
         run: |
           echo ${{ env.CODECOV_LABELS }}
