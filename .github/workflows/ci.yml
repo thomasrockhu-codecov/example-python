@@ -12,6 +12,7 @@ jobs:
           python-version: '3.10'
       - name: Test
         run: |
+          set +x
           curl https://keybase.io/codecovsecurity/pgp_keys.asc | gpg --no-default-keyring --import # One-time step
           ls -al ~/.gnupg
           gpg --version
@@ -19,5 +20,5 @@ jobs:
           curl -Os https://uploader.codecov.io/latest/macos/codecov
           curl -Os https://uploader.codecov.io/latest/macos/codecov.SHA256SUM
           curl -Os https://uploader.codecov.io/latest/macos/codecov.SHA256SUM.sig
-          gpgv --keyring ~/.gnupg/trustdb.gpg codecov.SHA256SUM.sig codecov.SHA256SUM
+          gpgv codecov.SHA256SUM.sig codecov.SHA256SUM
           shasum -a 256 -c codecov.SHA256SUM
