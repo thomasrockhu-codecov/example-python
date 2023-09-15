@@ -2,57 +2,22 @@ name: Workflow for Codecov example-python
 on: push
 jobs:
   run:
-    runs-on: ubuntu-latest
+    runs-on: macos-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
       - name: Set up Python 3.10
         uses: actions/setup-python@v4
         with:
           python-version: '3.10'
-      - name: Install dependencies
+      - name: Test
         run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
-      - name: Create commit in codecov
-        run: |
-          codecovcli create-commit -t ${{ secrets.CODECOV_TOKEN }}
-      - name: Create commit report in codecov
-        run: |
-          codecovcli create-report -t ${{ secrets.CODECOV_TOKEN }}
-      - name: Static Analysis
-        run: |
-          codecovcli static-analysis --token ${{ secrets.CODECOV_STATIC_TOKEN }}
-      - name: Label Analysis
-        run: |
-          exec 3>&1
-          BASE_SHA=$(git merge-base ${{ github.sha }}^ origin/main)
-          TESTS=$(codecovcli label-analysis --token ${{ secrets.CODECOV_STATIC_TOKEN }} --base-sha=$BASE_SHA --dry-run 2>&1 | tee >(cat - >&3) )
-          ALL_LABELS=($(echo $TESTS | tail -1 | sed 's/\"present_report_labels[^]]*\]//' | awk -vRS="]" -vFS="[" '{print $2}' ORS=' ' | sed 's/\"//g' | sed 's/,//g' | tr -s ' '))
-          UNIQUE_LABELS=($(echo "${ALL_LABELS[@]}" | tr ' ' '\n' | sort -u | tr '\n' ' '))
-          echo "UNIQUE_LABELS"
-          echo ${UNIQUE_LABELS[*]}
-          PRESENT_REPORT_LABELS=($(echo $TESTS | tail -1 | awk -vRS="]" -vFS="present_report_labels\":" '{print $2}' ORS=' ' | sed 's/\"//g' | sed 's/,//g' | sed 's/\[//g' | tr -s ' '))
-          echo "PRESENT_REPORT_LABELS"
-          echo ${PRESENT_REPORT_LABELS[*]}
-          if [ ${#UNIQUE_LABELS[@]} -eq 0 ]; then
-            echo "All tests are being skipped. Selected random label to run"
-            UNIQUE_LABELS=${PRESENT_REPORT_LABELS[ $RANDOM % ${#PRESENT_REPORT_LABELS[@]} ]}
-          fi
-
-          echo "Collected ${#UNIQUE_LABELS[@]} tests to run"
-          LABELS_AS_STRING=$(printf -- " %s" ${UNIQUE_LABELS[*]})
-          echo "CODECOV_LABELS=$LABELS_AS_STRING" >> $GITHUB_ENV
-      - name: Run tests and coverage
-        run: |
-          echo ${{ env.CODECOV_LABELS }}
-          pytest --cov=app ${{ env.CODECOV_LABELS }}
-      - name: Upload to Codecov
-        run: |
-          codecovcli --codecov-yml-path=codecov.yml do-upload \
-          -t ${{ secrets.CODECOV_TOKEN }} \
-          --plugin pycoverage \
-          --plugin compress-pycoverage \
-          --flag smart-tests
+          curl https://keybase.io/codecovsecurity/pgp_keys.asc | gpg --no-default-keyring --import # One-time step
+          ls -al ~/.gnupg
+          gpg --version
+          gpgv --version
+          curl -Os https://uploader.codecov.io/latest/macos/codecov
+          curl -Os https://uploader.codecov.io/latest/macos/codecov.SHA256SUM
+          curl -Os https://uploader.codecov.io/latest/macos/codecov.SHA256SUM.sig
+          gpgv --keyring ~/.gnupg/trustdb.gpg codecov.SHA256SUM.sig codecov.SHA256SUM
+          shasum -a 256 -c codecov.SHA256SUM
