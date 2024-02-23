@@ -8,4 +8,8 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
       - name: Run script
-        run: python script.py
+        run: |
+          ls -al /__w/example-python/
+          ls -al /__w/example-python/example-python
+          echo "meow"
+          python script.py
