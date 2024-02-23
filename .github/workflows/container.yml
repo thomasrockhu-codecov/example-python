@@ -1,0 +1,11 @@
+name: container-test
+on: [push, pull_request]
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    container: python:3.11-slim
+  steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+    - name: Run script
+      run: python script.py
