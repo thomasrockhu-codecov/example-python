@@ -4,8 +4,8 @@ jobs:
   run:
     runs-on: ubuntu-latest
     container: python:3.11-slim
-  steps:
-    - name: Checkout
-      uses: actions/checkout@v4
-    - name: Run script
-      run: python script.py
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Run script
+        run: python script.py
