@@ -19,4 +19,6 @@ jobs:
       - name: Run tests and collect coverage
         run: pytest --cov app
       - name: Upload coverage to Codecov
-        run: ./codecovcli_linux -t ${{ secrets.CODECOV_TOKEN }} -v
+        run: ./codecovcli_linux upload-process
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
