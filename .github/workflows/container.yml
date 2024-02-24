@@ -3,7 +3,7 @@ on: [push, pull_request]
 jobs:
   run:
     runs-on: ubuntu-latest
-    container: pyaction:latest
+    container: cicirello/pyaction:latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
